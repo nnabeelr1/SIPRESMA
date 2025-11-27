@@ -17,8 +17,8 @@ Project ini terdiri dari 10 modul data dengan hubungan antar tabel sesuai ERD.
 | KRS | /krs | Anggota 4 |
 | Nilai | /nilai | Anggota 5 |
 | Prestasi Non-Akademik | /prestasi | Anggota 5 |
-| Dashboard & Laporan | /dashboard | Anggota 6 |
-| Peer Support Matchmaking | /peersupport | Anggota 6 |
+| Dashboard & Laporan | /dashboard | Anggota 1 |
+| Peer Support Matchmaking | /peersupport | Anggota 3 |
 
 > Semua anggota _hanya mengerjakan_ folder modul masing-masing.
 
@@ -93,8 +93,8 @@ Jika berhasil akan muncul tabel: USER, MAHASISWA, DOSEN, PRODI, MATAKULIAH, KELA
 | dev-krs | Anggota 4 |
 | dev-nilai | Anggota 5 |
 | dev-prestasi | Anggota 5 |
-| dev-dashboard | Anggota 6 |
-| dev-peersupport | Anggota 6 |
+| dev-dashboard | Anggota 1 |
+| dev-peersupport | Anggota 3 |
 
 ---
 
@@ -178,12 +178,11 @@ Mahasiswa berisiko akademik tinggi dipasangkan dengan teman sebaya berprestasi u
 
 ## 👨‍💻 Kontributor
 
-- Anggota 1: [Nama] - User & Mahasiswa
+- Anggota 1: [Nama] - User, Mahasiswa & Dashboard
 - Anggota 2: [Nama] - Dosen & Prodi
-- Anggota 3: [Nama] - Mata Kuliah & Kelas
+- Anggota 3: [Nama] - Mata Kuliah, Kelas & Peer Support
 - Anggota 4: [Nama] - Semester & KRS
 - Anggota 5: [Nama] - Nilai & Prestasi
-- Anggota 6: [Nama] - Dashboard & Peer Support
 
 ---
 
