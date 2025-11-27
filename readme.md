@@ -1,275 +1,202 @@
-# SIPRESMA 🎓🛡️
-**Sistem Informasi Prestasi dan Manajemen Risiko Akademik**
+# Sistem Informasi Prestasi dan Manajemen Risiko Akademik (SIPRESMA)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![PHP Version](https://img.shields.io/badge/PHP-7.4%2B-blue)](https://www.php.net/)
-[![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-purple)](https://getbootstrap.com/)
-
-> Project praktikum pengembangan aplikasi berbasis web dengan fitur Early Warning System (EWS) dan Peer Support Matchmaking untuk deteksi dini mahasiswa berisiko.
-
----
-
-## 📋 Daftar Isi
-
-- [Tentang Project](#-tentang-project)
-- [Fitur Utama](#-fitur-utama)
-- [Daftar Modul](#-daftar-modul)
-- [Teknologi](#-teknologi)
-- [Instalasi](#-instalasi)
-- [Struktur Folder](#-struktur-folder)
-- [Alur Kerja Git](#-alur-kerja-git)
-- [Aturan Kontribusi](#-aturan-kontribusi)
-- [Tim Pengembang](#-tim-pengembang)
-
----
-
-## 🎯 Tentang Project
-
-SIPRESMA adalah sistem informasi akademik yang tidak hanya mencatat nilai mahasiswa, tetapi juga dilengkapi dengan:
-- **Early Warning System (EWS)** untuk mendeteksi mahasiswa berisiko akademik
-- **Peer Support Matchmaking** untuk menghubungkan mahasiswa dengan mentor sebaya
-- **Manajemen Prestasi Non-Akademik** sebagai data pendukung evaluasi mahasiswa
-
-Project ini dikembangkan dengan relasi antar tabel sesuai Entity Relationship Diagram (ERD) yang telah disepakati tim.
-
----
-
-## ✨ Fitur Utama
-
-- 🔐 **Autentikasi & Manajemen User** - Login multi-role (Admin, Dosen, Mahasiswa)
-- 📚 **Data Master Lengkap** - Mahasiswa, Dosen, Program Studi
-- 🎓 **Akademik** - Mata Kuliah, Kelas, Semester
-- 📝 **Transaksi Akademik** - KRS dan Input Nilai
-- ⚠️ **Early Warning System** - Alert otomatis untuk mahasiswa IPK < 2.00
-- 🤝 **Peer Support Matchmaking** - Rekomendasi mentor berdasarkan performa
-- 🏆 **Prestasi Non-Akademik** - Pencatatan lomba, organisasi, sertifikat
-- 📊 **Dashboard & Laporan** - Visualisasi data dan cetak transkrip
-
----
+Project ini dibuat untuk memenuhi tugas praktikum pengembangan aplikasi berbasis web.
+Project ini terdiri dari 10 modul data dengan hubungan antar tabel sesuai ERD.
 
 ## 📌 Daftar Modul
 
 | Modul | Folder | Penanggung Jawab |
 |-------|--------|------------------|
-| Auth & User | `/user` | Anggota 1 |
-| Data Master (Mhs, Dosen, Prodi) | `/master` | Anggota 1 |
-| Akademik (Matkul, Kelas, Smt) | `/akademik` | Anggota 2 |
-| Transaksi (KRS & Nilai) | `/transaksi` | Anggota 2 |
-| EWS & Matchmaking | `/ews` | Anggota 3 |
-| Prestasi Non-Akademik | `/prestasi` | Anggota 3 |
-| Laporan & Transkrip | `/laporan` | Anggota 4 |
-| Dashboard | `/dashboard` | Anggota 4 |
+| User/Pengguna | /user | Anggota 1 |
+| Mahasiswa | /mahasiswa | Anggota 1 |
+| Dosen | /dosen | Anggota 2 |
+| Program Studi | /prodi | Anggota 2 |
+| Mata Kuliah | /matakuliah | Anggota 3 |
+| Kelas | /kelas | Anggota 3 |
+| Semester | /semester | Anggota 4 |
+| KRS | /krs | Anggota 4 |
+| Nilai | /nilai | Anggota 5 |
+| Prestasi Non-Akademik | /prestasi | Anggota 5 |
+| Dashboard & Laporan | /dashboard | Anggota 6 |
+| Peer Support Matchmaking | /peersupport | Anggota 6 |
 
-> ⚠️ **Penting:** Setiap anggota hanya mengerjakan folder modul masing-masing untuk menghindari konflik.
-
----
-
-## 🛠 Teknologi
-
-- **Backend:** PHP 7.4+
-- **Database:** MySQL 5.7+
-- **Frontend:** Bootstrap 5.3, HTML5, CSS3, JavaScript
-- **Server:** XAMPP (Apache + MySQL)
-- **Version Control:** Git & GitHub
+> Semua anggota _hanya mengerjakan_ folder modul masing-masing.
 
 ---
 
-## 💾 Instalasi
+## 💾 1. Cara Menjalankan Project (XAMPP)
 
-### 1️⃣ Persiapan Environment
-
-```bash
-# Pastikan XAMPP sudah terinstal
-# Download di: https://www.apachefriends.org/
-```
-
-### 2️⃣ Clone Repository
-
-```bash
-# Clone ke folder htdocs XAMPP
-cd C:\xampp\htdocs
-git clone https://github.com/username/sipresma.git
-cd sipresma
-```
-
-### 3️⃣ Setup Database
-
-1. Start **Apache** dan **MySQL** di XAMPP Control Panel
-2. Buka browser: `http://localhost/phpmyadmin`
-3. Buat database baru dengan nama: `db_sipresma`
-4. Import file `db_sipresma.sql` yang ada di root repository
-
-**Tabel yang akan terbuat:**
-- `USER`
-- `MAHASISWA`
-- `DOSEN`
-- `PRODI`
-- `MATAKULIAH`
-- `KELAS`
-- `KRS`
-- `NILAI`
-- `PRESTASI`
-- `PEER_MENTORING`
-
-### 4️⃣ Konfigurasi Koneksi
-
-Edit file `config/koneksi.php` jika diperlukan:
-
-```php
-<?php
-$host = "localhost";
-$user = "root";
-$pass = "";
-$db   = "db_sipresma";
-
-$conn = mysqli_connect($host, $user, $pass, $db);
-?>
-```
-
-### 5️⃣ Jalankan Aplikasi
-
-Buka browser dan akses:
-```
-http://localhost/sipresma/
-```
+1. Pastikan XAMPP terinstal
+2. Start **Apache** dan **MySQL**
+3. Clone project ini ke htdocs: C:\xampp\htdocs\sipresma
+4. Akses project di browser: http://localhost/sipresma/
 
 ---
 
-## 🌐 Struktur Folder
+## 🗄 2. Import Database (Wajib dilakukan semua anggota)
 
-```
-sipresma/
-│
-├── index.php                 # Landing page / Login
-├── db_sipresma.sql           # File database
-│
-├── config/
-│   └── koneksi.php           # Konfigurasi database
-│
-├── assets/
-│   ├── css/                  # File CSS
-│   ├── js/                   # JavaScript & Bootstrap
-│   └── img/                  # Gambar/logo
-│
-├── user/                     # Modul Manajemen User
-├── master/                   # Modul Data Master
-├── akademik/                 # Modul Akademik
-├── transaksi/                # Modul KRS & Nilai
-├── ews/                      # Modul EWS & Matchmaking
-├── prestasi/                 # Modul Prestasi
-├── laporan/                  # Modul Laporan
-└── dashboard/                # Dashboard utama
-```
+1. Buka phpMyAdmin
+2. Buat database: db_sipresma
+3. Klik **Import**
+4. Upload file **db_sipresma.sql** atau jalankan perintah SQL dari repository.
+
+Jika berhasil akan muncul tabel: USER, MAHASISWA, DOSEN, PRODI, MATAKULIAH, KELAS, SEMESTER, KRS, NILAI, PRESTASI_NONAKADEMIK, PEER_SUPPORT
 
 ---
 
-## 🔀 Alur Kerja Git
+## 🌐 3. Struktur Folder Utama
 
-### 📌 Daftar Branch
-
-| Branch | Fungsi | Developer |
-|--------|--------|-----------|
-| `main` | Branch utama (production-ready) | Semua |
-| `dev-user` | Auth & Master Data | Anggota 1 |
-| `dev-akademik` | Akademik & Transaksi | Anggota 2 |
-| `dev-fitur` | EWS & Prestasi | Anggota 3 |
-| `dev-ui` | Dashboard & Laporan | Anggota 4 |
-
-### 🔄 Workflow Standar
-
-#### Sebelum Mulai Coding
-
-```bash
-git pull origin main
-git checkout dev-user  # sesuaikan dengan branch masing-masing
-```
-
-#### Setelah Selesai Coding
-
-```bash
-git add .
-git commit -m "feat: tambah fitur input nilai mahasiswa"
-git push origin dev-user  # sesuaikan dengan branch masing-masing
-```
-
-#### Merge ke Main Branch
-
-1. Buka GitHub repository
-2. Buat **Pull Request** dari branch kamu ke `main`
-3. Minta **Code Review** dari anggota tim
-4. Setelah approved → **Merge Pull Request**
+1. index.php → halaman menu utama
+2. config/koneksi.php → koneksi database
+3. public/ → css & js (Bootstrap)
+4. user/ → modul User/Pengguna
+5. mahasiswa/ → modul Mahasiswa
+6. dosen/ → modul Dosen
+7. prodi/ → modul Program Studi
+8. matakuliah/ → modul Mata Kuliah
+9. kelas/ → modul Kelas
+10. semester/ → modul Semester
+11. krs/ → modul KRS
+12. nilai/ → modul Nilai
+13. prestasi/ → modul Prestasi Non-Akademik
+14. dashboard/ → modul Dashboard & Laporan
+15. peersupport/ → modul Peer Support Matchmaking
 
 ---
 
-## ⚠️ Aturan Kontribusi
+## 🧠 4. Aturan GitHub (WAJIB)
 
-### 🔥 DILARANG KERAS:
-
-❌ Commit langsung ke branch `main`  
-❌ Push tanpa melakukan `git pull` terlebih dahulu  
+### 🔥 Dilarang keras:
+❌ Commit ke branch `main`  
+❌ Push tanpa melakukan `git pull`  
 ❌ Mengutak-atik folder modul milik orang lain  
-❌ Mengubah file `koneksi.php` tanpa koordinasi tim  
 
-### ✅ WAJIB:
-
-✔️ Selalu `git pull` sebelum mulai coding  
-✔️ Kerja di branch masing-masing  
-✔️ Gunakan commit message yang jelas  
-✔️ Pull Request untuk merge ke `main`  
-
-### 💡 Tips Menghindari Konflik
-
-- Jangan edit file di folder modul orang lain
-- Jangan rename folder tanpa koordinasi
-- Jangan ubah `index.php` tanpa diskusi tim
-- Kabari di grup jika menambah library baru
+### ✔ Wajib:
+1. **Pull dulu sebelum bekerja**
+2. **Kerja di branch masing-masing**
+3. **Push ke branch masing-masing**
+4. **Pull Request kalau mau merge ke `main`**
 
 ---
 
-## 🎯 Roadmap Project
+## 🔀 5. Daftar Branch Per Anggota
 
-- [x] Setup repository & database structure
-- [x] Implementasi autentikasi user
-- [ ] CRUD semua modul berjalan
-- [ ] Relasi Foreign Key berfungsi sempurna
-- [ ] Logika EWS aktif (Alert IPK < 2.00)
-- [ ] Peer Support Matchmaking berjalan
-- [ ] UI Bootstrap konsisten di semua halaman
-- [ ] Testing & Bug Fixing
-- [ ] Dokumentasi lengkap
-
----
-
-## 👨‍💻 Tim Pengembang
-
-| Nama | Role | Modul | GitHub |
-|------|------|-------|--------|
-| Anggota 1 | Frontend Lead | Auth & Master Data | [@username1](https://github.com/username1) |
-| Anggota 2 | Backend Developer | Akademik & Transaksi | [@username2](https://github.com/username2) |
-| Anggota 3 | Logic Developer | EWS & Prestasi | [@username3](https://github.com/username3) |
-| Anggota 4 | UI/UX Developer | Dashboard & Laporan | [@username4](https://github.com/username4) |
+| Branch | Untuk |
+|--------|--------|
+| dev-user | Anggota 1 |
+| dev-mahasiswa | Anggota 1 |
+| dev-dosen | Anggota 2 |
+| dev-prodi | Anggota 2 |
+| dev-matakuliah | Anggota 3 |
+| dev-kelas | Anggota 3 |
+| dev-semester | Anggota 4 |
+| dev-krs | Anggota 4 |
+| dev-nilai | Anggota 5 |
+| dev-prestasi | Anggota 5 |
+| dev-dashboard | Anggota 6 |
+| dev-peersupport | Anggota 6 |
 
 ---
 
-## 📞 Kontak & Support
+## 🧩 6. Alur Kerja Git (Langkah Demi Langkah)
 
-Jika ada pertanyaan atau menemukan bug:
-- Buat **Issue** di GitHub
-- Diskusi di grup WhatsApp tim
-- Email: sipresma@university.ac.id
+### 📌 Saat mau mulai coding
+- git pull
+- git checkout <nama-branchmu>
+
+### 📌 Setelah selesai coding
+- git add .
+- git commit -m "progress hari ini"
+- git push
+
+### 📌 Setelah modul selesai dan siap digabung ke main
+- Buat **Pull Request di GitHub**
+- Minta anggota lain untuk review
+- Setelah disetujui → merge ke `main`
 
 ---
 
-## 📄 Lisensi
+## 🔧 7. Tips agar tidak konflik saat merge
 
-Project ini dibuat untuk keperluan akademik dan pembelajaran.
+- Jangan edit file milik modul orang lain
+- Jangan rename folder
+- Jangan ubah file `index.php` tanpa koordinasi tim
+- Kalau menambah link baru → koordinasikan dulu
+- Selalu pull sebelum mulai coding
 
 ---
 
-<div align="center">
+## 🎯 Goal Akhir Project
 
-**Dibuat dengan ❤️ oleh Tim SIPRESMA**
+### Fitur Utama:
 
-⭐ Jangan lupa beri star jika project ini bermanfaat!
+**Manajemen Akademik**
+- Admin Prodi mengelola data master (mahasiswa, dosen, prodi, matkul)
+- Pembukaan semester dan pengelolaan kelas
+- Mahasiswa melakukan KRS online
+- Dosen input nilai mahasiswa
+- Sistem otomatis menghitung IPS/IPK
 
-</div>
+**Early Warning System (EWS)**
+- Deteksi mahasiswa berisiko akademik (IP rendah, SKS sedikit)
+- Dashboard pemantauan untuk Dosen Wali
+- Alert otomatis untuk mahasiswa bermasalah
+
+**Identifikasi Mahasiswa Berprestasi**
+- Database prestasi akademik dan non-akademik
+- Rekomendasi calon Mawapres (Mahasiswa Berprestasi)
+- Laporan analitik untuk Pimpinan Prodi
+
+**Peer Support Matchmaking**
+- Sistem otomatis mempertemukan mahasiswa berisiko dengan mentor sebaya
+- Matching berdasarkan prodi, angkatan, dan kompetensi
+- Monitoring progress mentoring informal
+- Dukungan berbasis komunitas mahasiswa
+
+**Dashboard & Laporan**
+- Visualisasi data akademik dan prestasi
+- Export laporan PDF/Excel
+- Analytics untuk pengambilan keputusan
+
+---
+
+## 📊 Fitur Unggulan: Peer Support Matchmaking
+
+Fitur inovatif yang membedakan SIPRESMA dari sistem akademik konvensional:
+
+**Konsep:**
+Mahasiswa berisiko akademik tinggi dipasangkan dengan teman sebaya berprestasi untuk mentoring informal (bukan formal seperti dosen wali). Dukungan emosional dan akademik dari sesama mahasiswa.
+
+**Mekanisme:**
+1. Sistem deteksi otomatis mahasiswa berisiko (IP < 2.5, SKS < 18)
+2. Algoritma matching dengan mahasiswa berprestasi (IP > 3.5) di prodi yang sama
+3. Notifikasi ke kedua pihak untuk memulai mentoring
+4. Monitoring berkala progress akademik mentee
+5. Feedback dan evaluasi program peer support
+
+---
+
+## 👨‍💻 Kontributor
+
+- Anggota 1: [Nama] - User & Mahasiswa
+- Anggota 2: [Nama] - Dosen & Prodi
+- Anggota 3: [Nama] - Mata Kuliah & Kelas
+- Anggota 4: [Nama] - Semester & KRS
+- Anggota 5: [Nama] - Nilai & Prestasi
+- Anggota 6: [Nama] - Dashboard & Peer Support
+
+---
+
+## 📝 Catatan Penting
+
+- Semua modul harus terintegrasi melalui foreign key
+- Gunakan Bootstrap untuk konsistensi UI/UX
+- Implementasi validasi input di semua form
+- Testing fitur secara menyeluruh sebelum merge ke main
+- Dokumentasikan setiap perubahan major di commit message
+
+---
+
+Project ini akan terus dikembangkan hingga semua modul CRUD selesai dan siap untuk presentasi.
+
+**SIPRESMA - Smart Academic Management for Better Student Success**
