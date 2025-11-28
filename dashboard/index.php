@@ -1,5 +1,5 @@
 <?php
-// --- 1. KODE SATPAM ---
+// --- 1. KODE SATPAM (Security) ---
 session_start();
 if (!isset($_SESSION['status']) || $_SESSION['status'] != 'login') {
     header("Location: ../index.php?pesan=belum_login");
@@ -12,11 +12,11 @@ if ($_SESSION['role'] != 'admin') {
 
 include '../config/koneksi.php';
 
-// --- QUERY HITUNG DATA ---
-$total_mhs   = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM mahasiswa"));
-$total_dosen = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM dosen"));
-$total_prodi = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM prodi"));
-$total_user  = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM user"));
+// --- 2. QUERY HITUNG DATA (Statistik) ---
+$total_mhs    = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM mahasiswa"));
+$total_dosen  = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM dosen"));
+$total_prodi  = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM prodi"));
+$total_matkul = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM matakuliah"));
 ?>
 
 <!DOCTYPE html>
@@ -45,10 +45,11 @@ $total_user  = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM user"));
     <div class="container">
         <div class="alert alert-info border-0 shadow-sm mb-4">
             <h4 class="alert-heading">Selamat Datang, Admin! 👋</h4>
-            <p class="mb-0">Berikut adalah ringkasan data akademik terkini.</p>
+            <p class="mb-0">Berikut adalah ringkasan data akademik terkini di sistem SIPRESMA.</p>
         </div>
 
         <div class="row g-4 mb-5">
+            
             <div class="col-md-3">
                 <div class="card card-stat bg-primary text-white h-100 border-0 shadow-sm">
                     <div class="card-body">
@@ -86,16 +87,17 @@ $total_user  = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM user"));
             </div>
 
              <div class="col-md-3">
-                <div class="card card-stat bg-secondary text-white h-100 border-0 shadow-sm">
+                <div class="card card-stat bg-danger text-white h-100 border-0 shadow-sm">
                     <div class="card-body">
-                        <h5 class="card-title opacity-75">Total Akun</h5>
-                        <h1 class="display-4 fw-bold mb-0"><?php echo $total_user; ?></h1>
+                        <h5 class="card-title opacity-75">Mata Kuliah</h5>
+                        <h1 class="display-4 fw-bold mb-0"><?php echo $total_matkul; ?></h1>
                     </div>
-                    <div class="card-footer bg-secondary border-0">
-                        <a href="../user/index.php" class="text-white text-decoration-none small">Kelola User &rarr;</a>
+                    <div class="card-footer bg-danger border-0">
+                        <a href="../matakuliah/index.php" class="text-white text-decoration-none small">Lihat Detail &rarr;</a>
                     </div>
                 </div>
             </div>
+
         </div>
 
         <h5 class="mb-3 text-secondary">Akses Modul Cepat</h5>
@@ -115,6 +117,11 @@ $total_user  = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM user"));
         </div>
 
     </div>
+
+    <footer class="text-center mt-5 py-4 text-muted border-top">
+        &copy; 2025 SIPRESMA Group 4
+    </footer>
+
     <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
