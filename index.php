@@ -44,8 +44,9 @@ if (isset($_POST['login'])) {
             header("Location: dashboard/index.php");
         } else if ($data['role'] == 'mahasiswa') {
             header("Location: dashboard/welcome_mhs.php");
-        } else {
-            header("Location: dashboard/index.php");
+        } else if ($data['role'] == 'dosen') {
+            // INI BARU: Arahkan Dosen ke Dashboard Khusus
+            header("Location: dashboard/welcome_dosen.php");
         }
         
     } else {

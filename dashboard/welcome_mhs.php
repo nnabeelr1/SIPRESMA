@@ -1,5 +1,6 @@
 <?php
 session_start();
+include '../config/koneksi.php';
 
 // 1. Cek apakah user sudah login?
 if (!isset($_SESSION['status']) || $_SESSION['status'] != 'login') {
@@ -12,11 +13,16 @@ if ($_SESSION['role'] != 'mahasiswa') {
     echo "Akses Ditolak! Anda bukan mahasiswa.";
     exit();
 }
-?>
 
-<!DOCTYPE html>
-<html lang="id">
-...
+// 3. Ambil NIM Mahasiswa yang sedang login
+// (Kita cari NIM berdasarkan username session)
+$username = $_SESSION['username'];
+$query_mhs = mysqli_query($koneksi, "SELECT nim FROM mahasiswa 
+                                     JOIN user ON mahasiswa.id_user = user.id_user 
+                                     WHERE user.username = '$username'");
+$data_mhs = mysqli_fetch_assoc($query_mhs);
+$nim_saya = $data_mhs['nim'];
+?>
 
 <!DOCTYPE html>
 <html lang="id">
@@ -40,15 +46,57 @@ if ($_SESSION['role'] != 'mahasiswa') {
                 <h1 class="display-4 text-info">Halo, <?php echo $_SESSION['nama_lengkap']; ?>! 👋</h1>
                 <p class="lead mt-3">Selamat datang di Portal Mahasiswa SIPRESMA.</p>
                 <hr class="my-4">
-                
-                <p class="text-muted">
-                    Fitur <strong>KRS Online</strong>, <strong>Lihat Nilai</strong>, dan <strong>Peer Support</strong> 
-                    sedang dikerjakan oleh teman-teman kelompokmu. <br>
-                    Harap bersabar ya! 🛠️
-                </p>
 
-                <div class="alert alert-warning d-inline-block mt-3">
-                    Status Akademik Kamu: <strong>Aktif</strong>
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <?php
+                        // Cek status Peer Support saya
+                        $q_cek = mysqli_query($koneksi, "SELECT * FROM peer_support 
+                                                         WHERE (mentee_nim = '$nim_saya' OR mentor_nim = '$nim_saya') 
+                                                         AND status != 'ditolak'");
+                        $data_ps = mysqli_fetch_assoc($q_cek);
+
+                        if ($data_ps) {
+                            // KONDISI 1: Masih Menunggu Dosen
+                            if ($data_ps['status'] == 'menunggu_dosen') {
+                                echo '
+                                <div class="alert alert-warning shadow-sm text-start">
+                                    <h4 class="alert-heading">⏳ Sedang Diproses Dosen Wali</h4>
+                                    <p class="mb-0">
+                                        Admin telah merekomendasikan kamu untuk program Peer Support.<br>
+                                        Saat ini usulan tersebut sedang menunggu persetujuan dari <strong>Dosen Wali</strong>.<br>
+                                        Mohon tunggu kabar selanjutnya ya!
+                                    </p>
+                                </div>';
+                            } 
+                            // KONDISI 2: Sudah Disetujui (AKTIF)
+                            else if ($data_ps['status'] == 'aktif') {
+                                echo '
+                                <div class="alert alert-success shadow-sm text-start">
+                                    <h4 class="alert-heading">🎉 SURAT PERINTAH MENTORING</h4>
+                                    <p>Selamat! Dosen Walimu telah menyetujui program ini.</p>
+                                    <hr>
+                                    <p class="mb-0">
+                                        Status: <strong>AKTIF</strong> <br>
+                                        Silakan segera temui pasangan mentoringmu di kampus untuk mulai belajar bersama.
+                                    </p>
+                                </div>';
+                            }
+                        } else {
+                            // KONDISI 3: Belum ada match / Normal
+                            echo '
+                            <div class="alert alert-light border shadow-sm">
+                                <p class="text-muted mb-0">
+                                    Belum ada kegiatan Peer Support yang aktif untukmu saat ini. <br>
+                                    Tetap semangat belajar! 🚀
+                                </p>
+                            </div>';
+                        }
+                        ?>
+                    </div>
+                </div>
+                <div class="mt-4 text-muted small">
+                    Fitur KRS Online & Lihat Nilai sedang dikerjakan teman sekelompokmu.
                 </div>
             </div>
         </div>
