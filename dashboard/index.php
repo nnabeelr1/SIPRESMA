@@ -17,6 +17,7 @@ $total_mhs    = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM mahasiswa"
 $total_dosen  = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM dosen"));
 $total_prodi  = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM prodi"));
 $total_matkul = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM matakuliah"));
+$total_kelas  = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM kelas")); // Tambahan hitung kelas
 ?>
 
 <!DOCTYPE html>
@@ -45,11 +46,10 @@ $total_matkul = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM matakuliah
     <div class="container">
         <div class="alert alert-info border-0 shadow-sm mb-4">
             <h4 class="alert-heading">Selamat Datang, Admin! 👋</h4>
-            <p class="mb-0">Berikut adalah ringkasan data akademik terkini di sistem SIPRESMA.</p>
+            <p class="mb-0">Berikut adalah ringkasan data akademik terkini.</p>
         </div>
 
         <div class="row g-4 mb-5">
-            
             <div class="col-md-3">
                 <div class="card card-stat bg-primary text-white h-100 border-0 shadow-sm">
                     <div class="card-body">
@@ -97,7 +97,6 @@ $total_matkul = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM matakuliah
                     </div>
                 </div>
             </div>
-
         </div>
 
         <h5 class="mb-3 text-secondary">Akses Modul Cepat</h5>
@@ -105,14 +104,19 @@ $total_matkul = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM matakuliah
             <div class="col-md-3 mb-2">
                 <a href="../mahasiswa/index.php" class="btn btn-outline-primary w-100 py-3 fw-bold">👨‍🎓 Mahasiswa</a>
             </div>
+            
             <div class="col-md-3 mb-2">
                 <a href="../dosen/index.php" class="btn btn-outline-secondary w-100 py-3 fw-bold">👩‍🏫 Dosen</a>
             </div>
+            
+            <div class="col-md-3 mb-2">
+                <a href="../kelas/index.php" class="btn btn-outline-warning text-dark w-100 py-3 fw-bold">
+                    🏫 Data Kelas <span class="badge bg-danger rounded-pill"><?php echo $total_kelas; ?></span>
+                </a>
+            </div>
+
             <div class="col-md-3 mb-2">
                 <a href="../peersupport/index.php" class="btn btn-outline-info w-100 py-3 fw-bold">🤝 Peer Support</a>
-            </div>
-            <div class="col-md-3 mb-2">
-                <a href="../user/index.php" class="btn btn-outline-dark w-100 py-3 fw-bold">⚙️ User Admin</a>
             </div>
         </div>
 
