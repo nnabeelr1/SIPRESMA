@@ -17,11 +17,19 @@ if ($_SESSION['role'] != 'mahasiswa') {
 // 3. Ambil NIM Mahasiswa yang sedang login
 // (Kita cari NIM berdasarkan username session)
 $username = $_SESSION['username'];
-$query_mhs = mysqli_query($koneksi, "SELECT nim FROM mahasiswa 
+$query_mhs = mysqli_query($koneksi, "SELECT nim, nama_lengkap FROM mahasiswa 
                                      JOIN user ON mahasiswa.id_user = user.id_user 
                                      WHERE user.username = '$username'");
 $data_mhs = mysqli_fetch_assoc($query_mhs);
-$nim_saya = $data_mhs['nim'];
+
+// Pastikan data mahasiswa ditemukan (jaga-jaga error)
+if ($data_mhs) {
+    $nim_saya = $data_mhs['nim'];
+    $nama_saya = $data_mhs['nama_lengkap'];
+} else {
+    echo "Data mahasiswa tidak ditemukan. Hubungi Admin.";
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -33,7 +41,7 @@ $nim_saya = $data_mhs['nim'];
 </head>
 <body class="bg-light">
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-info mb-4">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-info mb-4 shadow-sm">
         <div class="container">
             <a class="navbar-brand fw-bold" href="#">🎓 SIPRESMA Student</a>
             <a href="../logout.php" class="btn btn-light btn-sm text-info fw-bold">Logout</a>
@@ -43,24 +51,25 @@ $nim_saya = $data_mhs['nim'];
     <div class="container mt-5 text-center">
         <div class="card shadow-sm border-0">
             <div class="card-body p-5">
-                <h1 class="display-4 text-info">Halo, <?php echo $_SESSION['nama_lengkap']; ?>! 👋</h1>
+                <h1 class="display-4 text-info">Halo, <?php echo $nama_saya; ?>! 👋</h1>
                 <p class="lead mt-3">Selamat datang di Portal Mahasiswa SIPRESMA.</p>
                 <hr class="my-4">
 
-                <div class="row justify-content-center">
+                <div class="row justify-content-center mb-5">
                     <div class="col-md-8">
                         <?php
-                        // Cek status Peer Support saya
+                        // Cek status Peer Support saya (Baik sebagai Mentee maupun Mentor)
+                        // Kecualikan status 'ditolak' biar gak menuh-menuhin dashboard
                         $q_cek = mysqli_query($koneksi, "SELECT * FROM peer_support 
                                                          WHERE (mentee_nim = '$nim_saya' OR mentor_nim = '$nim_saya') 
                                                          AND status != 'ditolak'");
                         $data_ps = mysqli_fetch_assoc($q_cek);
 
                         if ($data_ps) {
-                            // KONDISI 1: Masih Menunggu Dosen
+                            // KONDISI A: Masih Menunggu Persetujuan Dosen Wali
                             if ($data_ps['status'] == 'menunggu_dosen') {
                                 echo '
-                                <div class="alert alert-warning shadow-sm text-start">
+                                <div class="alert alert-warning shadow-sm text-start border-warning">
                                     <h4 class="alert-heading">⏳ Sedang Diproses Dosen Wali</h4>
                                     <p class="mb-0">
                                         Admin telah merekomendasikan kamu untuk program Peer Support.<br>
@@ -69,10 +78,10 @@ $nim_saya = $data_mhs['nim'];
                                     </p>
                                 </div>';
                             } 
-                            // KONDISI 2: Sudah Disetujui (AKTIF)
+                            // KONDISI B: Sudah Disetujui (AKTIF)
                             else if ($data_ps['status'] == 'aktif') {
                                 echo '
-                                <div class="alert alert-success shadow-sm text-start">
+                                <div class="alert alert-success shadow-sm text-start border-success">
                                     <h4 class="alert-heading">🎉 SURAT PERINTAH MENTORING</h4>
                                     <p>Selamat! Dosen Walimu telah menyetujui program ini.</p>
                                     <hr>
@@ -83,7 +92,7 @@ $nim_saya = $data_mhs['nim'];
                                 </div>';
                             }
                         } else {
-                            // KONDISI 3: Belum ada match / Normal
+                            // KONDISI C: Belum ada match / Normal
                             echo '
                             <div class="alert alert-light border shadow-sm">
                                 <p class="text-muted mb-0">
@@ -95,8 +104,32 @@ $nim_saya = $data_mhs['nim'];
                         ?>
                     </div>
                 </div>
-                <div class="mt-4 text-muted small">
-                    Fitur KRS Online & Lihat Nilai sedang dikerjakan teman sekelompokmu.
+
+                <h5 class="mb-4 text-secondary">Menu Akademik</h5>
+                <div class="row justify-content-center">
+                    
+                    <div class="col-md-4 mb-3">
+                        <a href="../krs/index.php" class="btn btn-primary btn-lg w-100 shadow-sm py-4">
+                            🛒<br><strong>Isi KRS Online</strong>
+                        </a>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <a href="#" class="btn btn-outline-secondary btn-lg w-100 shadow-sm py-4 disabled">
+                            📊<br>Lihat KHS / Nilai<br><small>(Coming Soon)</small>
+                        </a>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <a href="#" class="btn btn-outline-info btn-lg w-100 shadow-sm py-4 disabled">
+                            🧑‍🎓<br>Info Akademik
+                        </a>
+                    </div>
+
+                </div>
+
+                <div class="mt-5 text-muted small">
+                    &copy; 2025 SIPRESMA Student Portal
                 </div>
             </div>
         </div>

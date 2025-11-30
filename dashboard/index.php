@@ -17,7 +17,11 @@ $total_mhs    = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM mahasiswa"
 $total_dosen  = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM dosen"));
 $total_prodi  = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM prodi"));
 $total_matkul = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM matakuliah"));
-$total_kelas  = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM kelas")); // Tambahan hitung kelas
+$total_kelas  = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM kelas"));
+// Hitung semester aktif
+$q_smt = mysqli_query($koneksi, "SELECT nama_semester FROM semester WHERE status='aktif'");
+$smt_aktif = mysqli_fetch_assoc($q_smt);
+$nama_smt = $smt_aktif ? $smt_aktif['nama_semester'] : 'Tidak Ada';
 ?>
 
 <!DOCTYPE html>
@@ -44,9 +48,12 @@ $total_kelas  = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM kelas")); 
     </nav>
 
     <div class="container">
-        <div class="alert alert-info border-0 shadow-sm mb-4">
-            <h4 class="alert-heading">Selamat Datang, Admin! 👋</h4>
-            <p class="mb-0">Berikut adalah ringkasan data akademik terkini.</p>
+        <div class="alert alert-info border-0 shadow-sm mb-4 d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="alert-heading">Selamat Datang, Admin! 👋</h4>
+                <p class="mb-0">Semester Aktif Saat Ini: <strong><?php echo $nama_smt; ?></strong></p>
+            </div>
+            <a href="../semester/index.php" class="btn btn-primary">⚙️ Ganti Semester</a>
         </div>
 
         <div class="row g-4 mb-5">
@@ -100,23 +107,32 @@ $total_kelas  = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM kelas")); 
         </div>
 
         <h5 class="mb-3 text-secondary">Akses Modul Cepat</h5>
-        <div class="row">
-            <div class="col-md-3 mb-2">
+        
+        <div class="row mb-2">
+            <div class="col-md-4 mb-2">
                 <a href="../mahasiswa/index.php" class="btn btn-outline-primary w-100 py-3 fw-bold">👨‍🎓 Mahasiswa</a>
             </div>
-            
-            <div class="col-md-3 mb-2">
+            <div class="col-md-4 mb-2">
                 <a href="../dosen/index.php" class="btn btn-outline-secondary w-100 py-3 fw-bold">👩‍🏫 Dosen</a>
             </div>
-            
-            <div class="col-md-3 mb-2">
+            <div class="col-md-4 mb-2">
                 <a href="../kelas/index.php" class="btn btn-outline-warning text-dark w-100 py-3 fw-bold">
                     🏫 Data Kelas <span class="badge bg-danger rounded-pill"><?php echo $total_kelas; ?></span>
                 </a>
             </div>
+        </div>
 
-            <div class="col-md-3 mb-2">
-                <a href="../peersupport/index.php" class="btn btn-outline-info w-100 py-3 fw-bold">🤝 Peer Support</a>
+        <div class="row">
+            <div class="col-md-6 mb-2">
+                <a href="../semester/index.php" class="btn btn-outline-danger w-100 py-3 fw-bold">
+                    🗓️ Atur Semester (KRS)
+                </a>
+            </div>
+
+            <div class="col-md-6 mb-2">
+                <a href="../peersupport/index.php" class="btn btn-outline-info w-100 py-3 fw-bold">
+                    🤝 Peer Support
+                </a>
             </div>
         </div>
 
