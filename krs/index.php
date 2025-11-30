@@ -8,19 +8,24 @@ if (!isset($_SESSION['status']) || $_SESSION['role'] != 'mahasiswa') {
     exit();
 }
 
-// 2. Ambil Data Mahasiswa yang Login
+// 2. Ambil Data Mahasiswa yang Login (Termasuk ID PRODI)
 $username = $_SESSION['username'];
-$q_mhs = mysqli_query($koneksi, "SELECT * FROM mahasiswa JOIN user ON mahasiswa.id_user = user.id_user WHERE user.username='$username'");
+$q_mhs = mysqli_query($koneksi, "
+    SELECT m.*, u.username 
+    FROM mahasiswa m 
+    JOIN user u ON m.id_user = u.id_user 
+    WHERE u.username='$username'
+");
 $data_mhs = mysqli_fetch_assoc($q_mhs);
 $nim_saya = $data_mhs['nim'];
+$id_prodi_saya = $data_mhs['id_prodi']; // <--- PENTING: Kita ambil ID Prodinya
 
-// 3. Cek Semester Aktif (Saklar)
+// 3. Cek Semester Aktif
 $q_smt = mysqli_query($koneksi, "SELECT * FROM semester WHERE status='aktif'");
 $smt_aktif = mysqli_fetch_assoc($q_smt);
 
-// Kalau tidak ada semester aktif, tolak akses
 if (!$smt_aktif) {
-    echo "<script>alert('Tidak ada semester aktif! Hubungi Admin.'); window.location='../dashboard/welcome_mhs.php';</script>";
+    echo "<script>alert('Tidak ada semester aktif!'); window.location='../dashboard/welcome_mhs.php';</script>";
     exit();
 }
 $id_smt_aktif = $smt_aktif['id_semester'];
@@ -53,42 +58,54 @@ $id_smt_aktif = $smt_aktif['id_semester'];
         </div>
 
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-7">
                 <div class="card shadow-sm h-100">
-                    <div class="card-header bg-success text-white">1. Pilih Mata Kuliah (Tersedia)</div>
+                    <div class="card-header bg-success text-white">1. Pilih Mata Kuliah (Sesuai Prodi)</div>
                     <div class="card-body">
-                        <table class="table table-bordered table-sm">
+                        <table class="table table-bordered table-sm align-middle">
                             <thead class="table-light">
                                 <tr>
                                     <th>Matkul</th>
-                                    <th>Kls</th>
+                                    <th class="text-center">Smt</th>
+                                    <th class="text-center">Kls</th>
                                     <th>Jadwal</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
-                                // Ambil semua kelas yang dibuka, TAPI yang BELUM diambil oleh mahasiswa ini
+                                // LOGIKA PERBAIKAN:
+                                // Hanya tampilkan matkul yang ID_PRODI-nya sama dengan mahasiswa
                                 $query_tersedia = mysqli_query($koneksi, "
-                                    SELECT k.*, m.nama_mk, m.sks 
+                                    SELECT k.*, m.nama_mk, m.sks, m.semester_paket, m.id_prodi
                                     FROM kelas k
                                     JOIN matakuliah m ON k.kode_mk = m.kode_mk
-                                    WHERE k.id_kelas NOT IN (
+                                    WHERE 
+                                    -- FILTER 1: HANYA MATKUL PRODI SAYA
+                                    m.id_prodi = '$id_prodi_saya' 
+                                    AND
+                                    -- FILTER 2: YANG BELUM SAYA AMBIL
+                                    k.id_kelas NOT IN (
                                         SELECT id_kelas FROM krs WHERE nim='$nim_saya' AND id_semester='$id_smt_aktif'
                                     )
-                                    ORDER BY m.nama_mk ASC
+                                    ORDER BY m.semester_paket ASC, m.nama_mk ASC
                                 ");
+
+                                if(mysqli_num_rows($query_tersedia) == 0) {
+                                    echo "<tr><td colspan='5' class='text-center text-muted py-4'>Tidak ada mata kuliah tersedia untuk Prodi Anda.</td></tr>";
+                                }
 
                                 while($row = mysqli_fetch_assoc($query_tersedia)) {
                                 ?>
                                     <tr>
                                         <td>
                                             <strong><?php echo $row['nama_mk']; ?></strong> <br>
-                                            <small><?php echo $row['sks']; ?> SKS</small>
+                                            <small class="text-muted"><?php echo $row['sks']; ?> SKS</small>
                                         </td>
+                                        <td class="text-center fw-bold text-secondary"><?php echo $row['semester_paket']; ?></td>
                                         <td class="text-center"><span class="badge bg-secondary"><?php echo $row['nama_kelas']; ?></span></td>
-                                        <td><small><?php echo $row['hari'] . ', ' . date('H:i', strtotime($row['jam_mulai'])); ?></small></td>
-                                        <td>
+                                        <td><small><?php echo $row['hari'] . ', ' . $row['jam_mulai']; ?></small></td>
+                                        <td class="text-center">
                                             <form action="create.php" method="POST">
                                                 <input type="hidden" name="id_kelas" value="<?php echo $row['id_kelas']; ?>">
                                                 <input type="hidden" name="id_semester" value="<?php echo $id_smt_aktif; ?>">
@@ -104,23 +121,22 @@ $id_smt_aktif = $smt_aktif['id_semester'];
                 </div>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-5">
                 <div class="card shadow-sm h-100">
                     <div class="card-header bg-primary text-white">2. KRS Anda (Sudah Diambil)</div>
                     <div class="card-body">
-                        <table class="table table-bordered table-sm">
+                        <table class="table table-bordered table-sm align-middle">
                             <thead class="table-light">
                                 <tr>
                                     <th>Matkul</th>
-                                    <th>Kls</th>
-                                    <th>SKS</th>
+                                    <th class="text-center">Kls</th>
+                                    <th class="text-center">SKS</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
                                 $total_sks = 0;
-                                // Ambil data KRS mahasiswa ini di semester aktif
                                 $query_krs = mysqli_query($koneksi, "
                                     SELECT krs.id_krs, m.nama_mk, m.sks, k.nama_kelas
                                     FROM krs
@@ -130,7 +146,7 @@ $id_smt_aktif = $smt_aktif['id_semester'];
                                 ");
 
                                 if(mysqli_num_rows($query_krs) == 0) {
-                                    echo "<tr><td colspan='4' class='text-center text-muted'>Belum ada matkul yang diambil.</td></tr>";
+                                    echo "<tr><td colspan='4' class='text-center text-muted py-3'>Belum ada matkul yang diambil.</td></tr>";
                                 }
 
                                 while($krs = mysqli_fetch_assoc($query_krs)) {
@@ -140,7 +156,7 @@ $id_smt_aktif = $smt_aktif['id_semester'];
                                         <td><?php echo $krs['nama_mk']; ?></td>
                                         <td class="text-center"><?php echo $krs['nama_kelas']; ?></td>
                                         <td class="text-center"><?php echo $krs['sks']; ?></td>
-                                        <td>
+                                        <td class="text-center">
                                             <a href="delete.php?id=<?php echo $krs['id_krs']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Batalkan matkul ini?')">X</a>
                                         </td>
                                     </tr>
