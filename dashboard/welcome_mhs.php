@@ -113,8 +113,8 @@ if ($data_mhs) {
                     </div>
                     
                     <div class="col-md-4 mb-3">
-                        <a href="#" class="btn btn-outline-info btn-lg w-100 shadow-sm py-4 disabled">
-                            🧑‍🎓<br>Info Akademik
+                        <a href="../prestasi/index.php" class="btn btn-outline-warning text-dark btn-lg w-100 shadow-sm py-4">
+                            🏆<br><strong>Prestasi</strong>
                         </a>
                     </div>
 
