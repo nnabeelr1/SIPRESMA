@@ -2,27 +2,25 @@
 session_start();
 include '../config/koneksi.php';
 
-// 1. Cek apakah user sudah login?
+// 1. Cek Login
 if (!isset($_SESSION['status']) || $_SESSION['status'] != 'login') {
     header("Location: ../index.php?pesan=belum_login");
     exit();
 }
 
-// 2. Cek apakah yang akses beneran mahasiswa?
+// 2. Cek Role Mahasiswa
 if ($_SESSION['role'] != 'mahasiswa') {
     echo "Akses Ditolak! Anda bukan mahasiswa.";
     exit();
 }
 
-// 3. Ambil NIM Mahasiswa yang sedang login
-// (Kita cari NIM berdasarkan username session)
+// 3. Ambil Identitas Mahasiswa
 $username = $_SESSION['username'];
 $query_mhs = mysqli_query($koneksi, "SELECT nim, nama_lengkap FROM mahasiswa 
                                      JOIN user ON mahasiswa.id_user = user.id_user 
                                      WHERE user.username = '$username'");
 $data_mhs = mysqli_fetch_assoc($query_mhs);
 
-// Pastikan data mahasiswa ditemukan (jaga-jaga error)
 if ($data_mhs) {
     $nim_saya = $data_mhs['nim'];
     $nama_saya = $data_mhs['nama_lengkap'];
@@ -58,28 +56,23 @@ if ($data_mhs) {
                 <div class="row justify-content-center mb-5">
                     <div class="col-md-8">
                         <?php
-                        // Cek status Peer Support saya (Baik sebagai Mentee maupun Mentor)
-                        // Kecualikan status 'ditolak' biar gak menuh-menuhin dashboard
+                        // Cek status Peer Support
                         $q_cek = mysqli_query($koneksi, "SELECT * FROM peer_support 
                                                          WHERE (mentee_nim = '$nim_saya' OR mentor_nim = '$nim_saya') 
                                                          AND status != 'ditolak'");
                         $data_ps = mysqli_fetch_assoc($q_cek);
 
                         if ($data_ps) {
-                            // KONDISI A: Masih Menunggu Persetujuan Dosen Wali
                             if ($data_ps['status'] == 'menunggu_dosen') {
                                 echo '
                                 <div class="alert alert-warning shadow-sm text-start border-warning">
                                     <h4 class="alert-heading">⏳ Sedang Diproses Dosen Wali</h4>
                                     <p class="mb-0">
                                         Admin telah merekomendasikan kamu untuk program Peer Support.<br>
-                                        Saat ini usulan tersebut sedang menunggu persetujuan dari <strong>Dosen Wali</strong>.<br>
-                                        Mohon tunggu kabar selanjutnya ya!
+                                        Saat ini usulan tersebut sedang menunggu persetujuan dari <strong>Dosen Wali</strong>.
                                     </p>
                                 </div>';
-                            } 
-                            // KONDISI B: Sudah Disetujui (AKTIF)
-                            else if ($data_ps['status'] == 'aktif') {
+                            } else if ($data_ps['status'] == 'aktif') {
                                 echo '
                                 <div class="alert alert-success shadow-sm text-start border-success">
                                     <h4 class="alert-heading">🎉 SURAT PERINTAH MENTORING</h4>
@@ -92,7 +85,6 @@ if ($data_mhs) {
                                 </div>';
                             }
                         } else {
-                            // KONDISI C: Belum ada match / Normal
                             echo '
                             <div class="alert alert-light border shadow-sm">
                                 <p class="text-muted mb-0">
@@ -115,8 +107,8 @@ if ($data_mhs) {
                     </div>
                     
                     <div class="col-md-4 mb-3">
-                        <a href="#" class="btn btn-outline-secondary btn-lg w-100 shadow-sm py-4 disabled">
-                            📊<br>Lihat KHS / Nilai<br><small>(Coming Soon)</small>
+                        <a href="../khs/index.php" class="btn btn-secondary btn-lg w-100 shadow-sm py-4">
+                            📊<br><strong>Lihat KHS / Nilai</strong>
                         </a>
                     </div>
                     

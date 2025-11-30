@@ -11,37 +11,34 @@ $q_dosen = mysqli_query($koneksi, "SELECT nidn, nama_lengkap FROM dosen WHERE id
 $data_dosen = mysqli_fetch_assoc($q_dosen);
 $nidn_saya = $data_dosen['nidn'];
 
-// 2. Logic Tombol Terima/Tolak
+// 2. Logic Tombol Terima/Tolak (Peer Support)
 if (isset($_POST['aksi'])) {
     $id_match = $_POST['id_match'];
-    $peran    = $_POST['peran_saya']; // Saya sebagai doswal mentee atau mentor?
+    $peran    = $_POST['peran_saya']; 
     $aksi     = $_POST['aksi'];
 
     if ($aksi == 'terima') {
-        // A. Update kolom ACC sesuai peran saya
+        // Update kolom ACC sesuai peran
         if ($peran == 'doswal_mentee') {
             mysqli_query($koneksi, "UPDATE peer_support SET acc_doswal_mentee=1 WHERE id_match='$id_match'");
         } else {
             mysqli_query($koneksi, "UPDATE peer_support SET acc_doswal_mentor=1 WHERE id_match='$id_match'");
         }
 
-        // B. Cek apakah SEKARANG sudah setuju dua-duanya?
+        // Cek apakah SEKARANG sudah setuju dua-duanya?
         $cek = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT * FROM peer_support WHERE id_match='$id_match'"));
         
         if ($cek['acc_doswal_mentee'] == 1 && $cek['acc_doswal_mentor'] == 1) {
-            // Kalau dua-duanya 1, baru SAH jadi AKTIF
             mysqli_query($koneksi, "UPDATE peer_support SET status='aktif' WHERE id_match='$id_match'");
             echo "<script>alert('SAH! Persetujuan lengkap. Status sekarang AKTIF.');</script>";
         } else {
-            // Kalau baru satu pihak
             echo "<script>alert('Anda menyetujui. Menunggu persetujuan Dosen Wali pasangannya...');</script>";
         }
 
     } else {
-        // [LOGIKA BARU] JANGAN DELETE, TAPI UPDATE STATUS JADI 'DITOLAK'
-        // Supaya admin tau kalau pasangan ini gak cocok, dan gak disaranin lagi
+        // Kalau tolak -> status 'ditolak'
         mysqli_query($koneksi, "UPDATE peer_support SET status='ditolak' WHERE id_match='$id_match'");
-        echo "<script>alert('Usulan Ditolak. Sistem akan mencarikan pasangan lain untuk mahasiswa tersebut.');</script>";
+        echo "<script>alert('Usulan Ditolak.');</script>";
     }
 }
 ?>
@@ -65,6 +62,17 @@ if (isset($_POST['aksi'])) {
     </nav>
 
     <div class="container">
+        
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body bg-white p-4 text-center">
+                <h4 class="text-success fw-bold mb-3">Menu Akademik</h4>
+                <a href="../nilai/index.php" class="btn btn-success btn-lg w-100 py-3 shadow-sm">
+                    📝 <strong>INPUT NILAI MAHASISWA</strong> <br>
+                    <small>Klik di sini untuk mengisi nilai kelas ajar Anda</small>
+                </a>
+            </div>
+        </div>
+
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-white border-bottom">
                 <h5 class="mb-0 text-success">📋 Persetujuan Peer Support</h5>
@@ -86,7 +94,6 @@ if (isset($_POST['aksi'])) {
                     </thead>
                     <tbody>
                         <?php
-                        // Query: Cari match yang melibatkan mahasiswa bimbingan saya
                         $query = mysqli_query($koneksi, "
                             SELECT ps.*, 
                                    m1.nama_lengkap as nama_mentee, m1.dosen_wali as doswal_mentee,
@@ -103,7 +110,6 @@ if (isset($_POST['aksi'])) {
                         }
 
                         while ($row = mysqli_fetch_assoc($query)) {
-                            // Cek peran saya di baris ini
                             if ($row['doswal_mentee'] == $nidn_saya) {
                                 $peran_saya = 'doswal_mentee';
                                 $label_peran = "Dosen Wali Mentee";
@@ -116,30 +122,24 @@ if (isset($_POST['aksi'])) {
                         ?>
                             <tr>
                                 <td>
-                                    Mentee: <strong><?php echo $row['nama_mentee']; ?></strong> (Butuh)<br>
-                                    Mentor: <strong><?php echo $row['nama_mentor']; ?></strong> (Pintar)
+                                    Mentee: <strong><?php echo $row['nama_mentee']; ?></strong><br>
+                                    Mentor: <strong><?php echo $row['nama_mentor']; ?></strong>
                                 </td>
+                                <td><span class="badge bg-info text-dark"><?php echo $label_peran; ?></span></td>
                                 <td>
-                                    <span class="badge bg-info text-dark"><?php echo $label_peran; ?></span>
-                                </td>
-                                <td>
-                                    Doswal Mentee: 
-                                    <?php echo ($row['acc_doswal_mentee'] == 1) ? '✅ Oke' : '⏳ Menunggu'; ?> <br>
-                                    
-                                    Doswal Mentor: 
-                                    <?php echo ($row['acc_doswal_mentor'] == 1) ? '✅ Oke' : '⏳ Menunggu'; ?>
+                                    Doswal Mentee: <?php echo ($row['acc_doswal_mentee'] == 1) ? '✅' : '⏳'; ?> <br>
+                                    Doswal Mentor: <?php echo ($row['acc_doswal_mentor'] == 1) ? '✅' : '⏳'; ?>
                                 </td>
                                 <td>
                                     <?php if ($sudah_acc == 0) { ?>
                                         <form method="POST">
                                             <input type="hidden" name="id_match" value="<?php echo $row['id_match']; ?>">
                                             <input type="hidden" name="peran_saya" value="<?php echo $peran_saya; ?>">
-                                            
-                                            <button type="submit" name="aksi" value="terima" class="btn btn-success btn-sm">✅ Setujui</button>
+                                            <button type="submit" name="aksi" value="terima" class="btn btn-success btn-sm">✅ ACC</button>
                                             <button type="submit" name="aksi" value="tolak" class="btn btn-danger btn-sm">❌ Tolak</button>
                                         </form>
                                     <?php } else { ?>
-                                        <span class="text-muted small"><i>Anda sudah menyetujui.<br>Menunggu rekan dosen.</i></span>
+                                        <span class="text-muted small">Sudah disetujui.</span>
                                     <?php } ?>
                                 </td>
                             </tr>
