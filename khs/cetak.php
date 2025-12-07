@@ -8,24 +8,25 @@ if (!isset($_SESSION['status']) || $_SESSION['role'] != 'mahasiswa') {
     exit();
 }
 
-// 2. Ambil Data Mahasiswa & Semester Aktif
+// 2. Ambil Data Mahasiswa
 $username = $_SESSION['username'];
-$q_mhs = mysqli_query($koneksi, "
-    SELECT m.*, d.nama_lengkap as nama_doswal, d.nidn, p.nama_prodi 
+$mhs = mysqli_fetch_assoc(mysqli_query($koneksi, "
+    SELECT m.*, d.nama_lengkap as nama_doswal, d.nidn, p.nama_prodi, p.jenjang 
     FROM mahasiswa m 
     JOIN user u ON m.id_user = u.id_user 
     LEFT JOIN dosen d ON m.dosen_wali = d.nidn
     LEFT JOIN prodi p ON m.id_prodi = p.id_prodi
     WHERE u.username='$username'
-");
-$mhs = mysqli_fetch_assoc($q_mhs);
-$nim_saya = $mhs['nim'];
+"));
 
-$q_smt = mysqli_query($koneksi, "SELECT * FROM semester WHERE status='aktif'");
-$smt = mysqli_fetch_assoc($q_smt);
+// 3. Ambil Semester Aktif
+$smt = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT * FROM semester WHERE status='aktif'"));
+if(!$smt) {
+    echo "Belum ada semester aktif."; exit();
+}
 $id_smt = $smt['id_semester'];
 
-// Set Locale Tanggal Indonesia
+// Locale Tanggal
 setlocale(LC_TIME, 'id_ID');
 $tanggal_cetak = date('d F Y');
 ?>
@@ -34,15 +35,12 @@ $tanggal_cetak = date('d F Y');
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>KRS_<?php echo $nim_saya; ?></title>
+    <title>KHS_<?php echo $mhs['nim']; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <style>
         /* SETUP KERTAS A4 */
-        @page {
-            size: A4;
-            margin: 2cm;
-        }
+        @page { size: A4; margin: 2cm; }
         
         body {
             font-family: "Times New Roman", Times, serif;
@@ -51,9 +49,9 @@ $tanggal_cetak = date('d F Y');
             background: white;
         }
 
-        /* KOP SURAT */
+        /* KOP SURAT (SAMA PERSIS KRS) */
         .header-kop {
-            border-bottom: 3px double black; /* Garis ganda tebal */
+            border-bottom: 3px double black;
             padding-bottom: 10px;
             margin-bottom: 20px;
             display: flex;
@@ -62,57 +60,50 @@ $tanggal_cetak = date('d F Y');
             text-align: center;
             gap: 20px;
         }
-        .logo-univ {
-            width: 80px; /* Sesuaikan ukuran logo */
-            height: auto;
-        }
         .header-text h2 { margin: 0; font-size: 16pt; font-weight: bold; text-transform: uppercase; }
         .header-text h3 { margin: 0; font-size: 14pt; font-weight: bold; }
         .header-text p { margin: 0; font-size: 10pt; font-style: italic; }
 
-        /* TABEL DATA */
+        /* TABEL BIODATA */
         .info-table { width: 100%; margin-bottom: 20px; }
         .info-table td { padding: 4px; vertical-align: top; }
         .label-col { width: 150px; font-weight: bold; }
         .colon-col { width: 10px; }
 
-        /* TABEL KRS (HITAM PEKAT) */
-        .krs-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
+        /* TABEL NILAI (HITAM PEKAT) */
+        .khs-table {
+            width: 100%; border-collapse: collapse; margin-bottom: 20px;
         }
-        .krs-table th, .krs-table td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: center;
+        .khs-table th, .khs-table td {
+            border: 1px solid black; padding: 6px 8px; text-align: center;
         }
-        .krs-table th {
-            background-color: #f0f0f0 !important; /* Abu muda saat print */
-            font-weight: bold;
+        .khs-table th {
+            background-color: #f0f0f0 !important; font-weight: bold;
             -webkit-print-color-adjust: exact;
         }
         .text-left { text-align: left !important; }
 
-        /* TANDA TANGAN */
-        .signature-section {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 50px;
-            page-break-inside: avoid;
-        }
-        .sign-box {
-            width: 40%;
+        /* IPS BOX */
+        .ips-container {
+            border: 1px solid black;
+            padding: 10px;
+            width: 300px;
+            margin-left: auto;
             text-align: center;
-        }
-        .sign-space {
-            height: 80px;
+            font-weight: bold;
+            margin-bottom: 40px;
         }
 
-        /* HIDE ELEMENT SAAT PRINT */
+        /* TANDA TANGAN */
+        .signature-section {
+            display: flex; justify-content: space-between; margin-top: 30px;
+            page-break-inside: avoid;
+        }
+        .sign-box { width: 40%; text-align: center; }
+        .sign-space { height: 80px; }
+
         @media print {
             .no-print { display: none !important; }
-            body { -webkit-print-color-adjust: exact; }
         }
     </style>
 </head>
@@ -134,7 +125,7 @@ $tanggal_cetak = date('d F Y');
     </div>
 
     <div class="text-center mb-4">
-        <h4 style="text-decoration: underline; font-weight: bold; margin-bottom: 5px;">KARTU RENCANA STUDI (KRS)</h4>
+        <h4 style="text-decoration: underline; font-weight: bold; margin-bottom: 5px;">KARTU HASIL STUDI (KHS)</h4>
         <span>Semester: <?php echo $smt['nama_semester']; ?></span>
     </div>
 
@@ -164,59 +155,87 @@ $tanggal_cetak = date('d F Y');
         </tr>
     </table>
 
-    <table class="krs-table">
+    <table class="khs-table">
         <thead>
             <tr>
                 <th width="5%">No</th>
-                <th width="15%">Kode MK</th>
+                <th width="12%">Kode MK</th>
                 <th>Mata Kuliah</th>
-                <th width="10%">Kelas</th>
-                <th width="10%">SKS</th>
-                <th width="25%">Jadwal</th>
+                <th width="8%">SKS</th>
+                <th width="8%">Nilai</th>
+                <th width="8%">Bobot</th>
+                <th width="10%">Mutu (KxN)</th>
             </tr>
         </thead>
         <tbody>
             <?php
-            $q_krs = mysqli_query($koneksi, "
-                SELECT krs.*, k.nama_kelas, k.hari, k.jam_mulai, k.jam_selesai, 
-                       m.kode_mk, m.nama_mk, m.sks
+            $query = mysqli_query($koneksi, "
+                SELECT krs.*, m.nama_mk, m.kode_mk, m.sks, n.grade 
                 FROM krs
                 JOIN kelas k ON krs.id_kelas = k.id_kelas
                 JOIN matakuliah m ON k.kode_mk = m.kode_mk
-                WHERE krs.nim='$nim_saya' AND krs.id_semester='$id_smt'
+                LEFT JOIN nilai n ON krs.id_krs = n.id_krs
+                WHERE krs.nim='{$mhs['nim']}' AND krs.id_semester='{$id_smt}'
                 ORDER BY m.nama_mk ASC
             ");
 
             $no = 1;
             $total_sks = 0;
-            while($row = mysqli_fetch_assoc($q_krs)) {
-                $total_sks += $row['sks'];
+            $total_mutu = 0;
+
+            while($row = mysqli_fetch_assoc($query)) {
+                $grade = $row['grade'] ? $row['grade'] : 'E';
+                $sks = $row['sks'];
+
+                // Konversi Bobot
+                switch ($grade) {
+                    case 'A':  $bobot = 4.00; break;
+                    case 'AB': $bobot = 3.50; break;
+                    case 'B':  $bobot = 3.00; break;
+                    case 'BC': $bobot = 2.50; break;
+                    case 'C':  $bobot = 2.00; break;
+                    case 'CD': $bobot = 1.50; break;
+                    case 'D':  $bobot = 1.00; break;
+                    default:   $bobot = 0.00;
+                }
+
+                $mutu = $sks * $bobot;
+                $total_sks += $sks;
+                $total_mutu += $mutu;
             ?>
                 <tr>
                     <td><?php echo $no++; ?></td>
                     <td><?php echo $row['kode_mk']; ?></td>
                     <td class="text-left"><?php echo $row['nama_mk']; ?></td>
-                    <td><?php echo $row['nama_kelas']; ?></td>
-                    <td><?php echo $row['sks']; ?></td>
-                    <td class="text-left"><?php echo $row['hari'] . ', ' . date('H:i', strtotime($row['jam_mulai'])); ?></td>
-                </tr>
-            <?php } ?>
-            
-            <?php for($i=0; $i<(8-$no); $i++) { ?>
-                <tr style="height: 30px;">
-                    <td></td><td></td><td></td><td></td><td></td><td></td>
+                    <td><?php echo $sks; ?></td>
+                    <td><?php echo $grade; ?></td>
+                    <td><?php echo number_format($bobot, 2); ?></td>
+                    <td><?php echo number_format($mutu, 2); ?></td>
                 </tr>
             <?php } ?>
 
+            <?php for($i=0; $i<(8-$no); $i++) { ?>
+                <tr style="height: 25px;">
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+            <?php } ?>
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="4" style="text-align: right; font-weight: bold; padding-right: 15px;">Total SKS :</td>
+                <td colspan="3" style="text-align: right; font-weight: bold; padding-right: 15px;">TOTAL</td>
                 <td style="font-weight: bold;"><?php echo $total_sks; ?></td>
-                <td></td>
+                <td colspan="2"></td>
+                <td style="font-weight: bold;"><?php echo number_format($total_mutu, 2); ?></td>
             </tr>
         </tfoot>
     </table>
+
+    <?php
+        $ips = ($total_sks > 0) ? ($total_mutu / $total_sks) : 0;
+    ?>
+    <div class="ips-container">
+        INDEKS PRESTASI SEMESTER (IPS) : <?php echo number_format($ips, 2); ?>
+    </div>
 
     <div class="signature-section">
         <div class="sign-box">
@@ -237,4 +256,4 @@ $tanggal_cetak = date('d F Y');
     </div>
 
 </body>
-</html>
+</html> 

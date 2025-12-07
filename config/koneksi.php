@@ -2,7 +2,7 @@
 $host = "localhost";
 $user = "root";
 $pass = "";
-$db   = "db_sipresma"; // Pastikan nama ini SAMA PERSIS dengan di phpMyAdmin
+$db   = "db_sipresma"; 
 
 $koneksi = mysqli_connect($host, $user, $pass, $db);
 

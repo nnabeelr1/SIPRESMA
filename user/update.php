@@ -8,22 +8,11 @@ $data = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT * FROM user WHERE id_u
 
 if (isset($_POST['update'])) {
     $user = $_POST['username'];
-    $pass = $_POST['password']; // Password Baru
+    $pass = $_POST['password']; 
     $role = $_POST['role'];
-
-    // Cek apakah admin mau ganti password atau tidak?
-    if (!empty($pass)) {
-        // Kalau password diisi, update passwordnya
-        $query = "UPDATE user SET username='$user', password='$pass', role='$role' WHERE id_user='$id'";
-    } else {
-        // Kalau kosong, jangan update passwordnya
-        $query = "UPDATE user SET username='$user', role='$role' WHERE id_user='$id'";
-    }
-
-    $update = mysqli_query($koneksi, $query);
-    if ($update) {
-        echo "<script>alert('Data user berhasil diupdate!'); window.location='index.php';</script>";
-    }
+    if (!empty($pass)) { $query = "UPDATE user SET username='$user', password='$pass', role='$role' WHERE id_user='$id'"; } 
+    else { $query = "UPDATE user SET username='$user', role='$role' WHERE id_user='$id'"; }
+    if (mysqli_query($koneksi, $query)) { echo "<script>alert('✅ Berhasil!'); window.location='index.php';</script>"; }
 }
 ?>
 
@@ -31,39 +20,94 @@ if (isset($_POST['update'])) {
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Edit User</title>
-    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit User - SIPRESMA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+    <style>
+        :root { --warning: #f59e0b; --bg-body: #f8fafc; --text-main: #1e293b; --text-muted: #94a3b8; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-body); color: var(--text-main); }
+        
+        /* Navbar Dashboard Style */
+        .navbar-clean { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); padding: 1rem 0; position: sticky; top: 0; z-index: 100; }
+        .brand-text { color: var(--text-main); letter-spacing: -0.5px; }
+
+        /* Card Form */
+        .card-modern { background: white; border-radius: 16px; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 4px 15px rgba(0,0,0,0.03); padding: 2.5rem; max-width: 500px; margin: 3rem auto; }
+        .form-label { font-weight: 700; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+        .form-control, .form-select { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.7rem 1rem; color: var(--text-main); }
+        .form-control:focus, .form-select:focus { border-color: var(--warning); outline: none; background: white; }
+        
+        .btn-warning-soft { background: var(--warning); color: white; border: none; font-weight: 600; padding: 0.8rem; border-radius: 10px; width: 100%; }
+        .btn-warning-soft:hover { background: #d97706; }
+        .btn-back { display: block; text-align: center; margin-top: 1rem; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
+        .alert-reset { background: #fffbeb; border: 1px solid #fcd34d; color: #b45309; padding: 0.8rem; border-radius: 10px; font-size: 0.85rem; display: flex; gap: 8px; margin-bottom: 5px; }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <div class="card col-md-6 mx-auto">
-            <div class="card-header bg-warning">Edit / Reset Password</div>
-            <div class="card-body">
-                <form method="POST">
-                    <div class="mb-3">
-                        <label>Username</label>
-                        <input type="text" name="username" class="form-control" value="<?php echo $data['username']; ?>" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label>Password Baru</label>
-                        <input type="password" name="password" class="form-control" placeholder="(Biarkan kosong jika tidak ingin mengganti password)">
-                        <small class="text-danger">*Isi hanya jika ingin mereset password user ini.</small>
-                    </div>
 
-                    <div class="mb-3">
-                        <label>Role</label>
-                        <select name="role" class="form-select">
-                            <option value="admin" <?php if($data['role']=='admin') echo 'selected'; ?>>Admin</option>
-                            <option value="mahasiswa" <?php if($data['role']=='mahasiswa') echo 'selected'; ?>>Mahasiswa</option>
-                            <option value="dosen" <?php if($data['role']=='dosen') echo 'selected'; ?>>Dosen</option>
-                        </select>
-                    </div>
-                    <button type="submit" name="update" class="btn btn-primary">Update</button>
-                    <a href="index.php" class="btn btn-secondary">Batal</a>
-                </form>
+    <nav class="navbar navbar-expand-lg navbar-clean mb-5">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+                <div class="bg-success bg-opacity-10 p-2 rounded-3 text-success d-flex"><iconify-icon icon="solar:infinity-bold" width="24"></iconify-icon></div>
+                <div><h5 class="fw-bold mb-0 brand-text">SIPRESMA</h5><p class="mb-0 text-muted" style="font-size: 10px; font-weight: 600; letter-spacing: 1px;">ACADEMIC DASHBOARD</p></div>
+            </a>
+            <div class="d-flex align-items-center gap-4">
+                <div class="d-none d-md-block text-end"><p class="mb-0 fw-bold text-dark" style="font-size: 0.9rem;">Administrator</p><p class="mb-0 text-muted" style="font-size: 0.75rem;">System Admin</p></div>
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center text-decoration-none" data-bs-toggle="dropdown">
+                        <div class="bg-light rounded-circle border p-1"><iconify-icon icon="solar:user-circle-bold" width="36" class="text-secondary"></iconify-icon></div>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 p-2">
+                        <li><a class="dropdown-item rounded-3" href="../logout.php"><iconify-icon icon="solar:logout-2-bold" class="me-2"></iconify-icon>Logout</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
+    </nav>
+
+    <div class="container">
+        <div class="card-modern">
+            <div class="text-center mb-4">
+                <div style="width: 50px; height: 50px; background: #fffbeb; color: var(--warning); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                    <iconify-icon icon="solar:pen-new-square-bold" style="font-size: 1.5rem;"></iconify-icon>
+                </div>
+                <h4 class="fw-bold">Edit Akun User</h4>
+                <p class="text-muted small">Update username, role, atau reset password.</p>
+            </div>
+
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <input type="text" name="username" class="form-control" value="<?php echo $data['username']; ?>" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label text-warning">Password Baru (Reset)</label>
+                    <div class="alert-reset">
+                        <iconify-icon icon="solar:key-minimalistic-bold" class="fs-5"></iconify-icon>
+                        <div>Biarkan kosong jika tidak ingin mengganti password.</div>
+                    </div>
+                    <input type="password" name="password" class="form-control" placeholder="Masukkan password baru...">
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Role Akses</label>
+                    <select name="role" class="form-select">
+                        <option value="admin" <?php if($data['role']=='admin') echo 'selected'; ?>>Admin</option>
+                        <option value="mahasiswa" <?php if($data['role']=='mahasiswa') echo 'selected'; ?>>Mahasiswa</option>
+                        <option value="dosen" <?php if($data['role']=='dosen') echo 'selected'; ?>>Dosen</option>
+                    </select>
+                </div>
+                
+                <button type="submit" name="update" class="btn-warning-soft">Update Data</button>
+                <a href="index.php" class="btn-back">Batal & Kembali</a>
+            </form>
+        </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
