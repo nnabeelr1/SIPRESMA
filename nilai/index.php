@@ -8,15 +8,13 @@ if ($_SESSION['role'] != 'dosen') {
     exit();
 }
 
-// Ambil Data Dosen
+// Data Dosen
 $id_user = $_SESSION['id_user'];
 $dosen = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT nidn, nama_lengkap FROM dosen WHERE id_user='$id_user'"));
 $nidn = $dosen['nidn'];
-$nama_dosen = $dosen['nama_lengkap'];
-// Ambil nama depan
-$nama_depan = explode(' ', trim($nama_dosen))[0];
+$nama_depan = explode(' ', trim($dosen['nama_lengkap']))[0];
 
-// Ambil Semester Aktif
+// Semester Aktif
 $smt = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT * FROM semester WHERE status='aktif'"));
 ?>
 
@@ -28,204 +26,240 @@ $smt = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT * FROM semester WHERE s
     <title>Input Nilai - SIPRESMA</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 
     <style>
+        /* --- THEME CONFIGURATION --- */
         :root {
-            /* Palette Konsisten */
-            --primary: #10b981;       /* Emerald */
-            --bg-body: #f8fafc;       
-            --text-main: #1e293b;     
+            --primary: #10b981;       
+            --primary-dark: #047857;
+            --text-main: #0f172a;     
             --text-muted: #64748b;    
-            --card-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            --radius-xl: 24px;
+            --nav-height: 80px;
         }
 
+        /* --- GLOBAL & ANIMATION --- */
+        html { overflow-y: scroll; } 
+        
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg-body);
             color: var(--text-main);
             min-height: 100vh;
-            padding-bottom: 3rem;
+            overflow-x: hidden;
+            
+            /* BACKGROUND: Mint Green + Dot Matrix */
+            background-color: #f0fdf4; 
+            background-image: 
+                radial-gradient(#86efac 1.2px, transparent 1.2px), 
+                radial-gradient(circle at top center, rgba(16, 185, 129, 0.1) 0%, rgba(240, 253, 244, 0) 70%); 
+            background-size: 24px 24px, 100% 100%;
+            background-attachment: fixed;
         }
 
-        /* --- Navbar Clean (Sama Persis Dashboard Dosen) --- */
+        /* Keyframes */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-entry {
+            animation: fadeInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            opacity: 0; 
+        }
+
+        /* --- NAVBAR (GLASS - LECTURER STYLE) --- */
         .navbar-clean {
-            background: white;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            padding: 0.8rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(16, 185, 129, 0.1); 
+            border-top: 3px solid var(--primary); 
+            height: var(--nav-height);
+            position: sticky; top: 0; z-index: 1000;
+            box-shadow: 0 4px 20px -10px rgba(16, 185, 129, 0.15);
         }
         .logo-box {
-            background: rgba(16, 185, 129, 0.1); 
-            color: #10b981;
-            width: 42px; height: 42px;
-            border-radius: 8px;
+            background: linear-gradient(135deg, #10b981, #047857);
+            color: white; padding: 8px; border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
         }
+        .brand-text { letter-spacing: -0.5px; color: var(--text-main); }
+        .brand-sub { letter-spacing: 1.5px; font-weight: 700; color: var(--text-muted); font-size: 10px; }
 
-        /* --- Page Header --- */
+        /* --- HEADER PAGE --- */
         .page-header {
             margin-top: 2rem; margin-bottom: 2rem;
             display: flex; justify-content: space-between; align-items: end;
         }
-        .page-title { font-size: 1.75rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.25rem; }
+        .page-title { font-size: 1.75rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.25rem; letter-spacing: -1px; }
         .page-subtitle { color: var(--text-muted); font-size: 0.95rem; font-weight: 500; }
 
-        /* --- Info Box (Layout Modern) --- */
-        .info-box {
-            background: white; border-radius: 16px; padding: 1.5rem;
-            border: 1px solid rgba(0,0,0,0.03);
-            box-shadow: var(--card-shadow);
-            margin-bottom: 2rem;
+        /* --- INFO BOX GLASS --- */
+        .info-glass {
+            background: rgba(255, 255, 255, 0.6); 
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 16px; padding: 1.2rem; margin-bottom: 2rem;
             display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
         }
-        .info-item label { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 0.2rem; }
-        .info-item div { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
+        .info-label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .info-value { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
 
-        /* --- Card Styles --- */
+        /* --- CARD & TABLE --- */
         .card-modern {
-            background: white; border-radius: 20px;
-            border: 1px solid rgba(0,0,0,0.03);
-            box-shadow: var(--card-shadow);
-            overflow: hidden;
+            background: rgba(255, 255, 255, 0.7); 
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.6);
+            border-radius: var(--radius-xl);
+            padding: 0; 
+            box-shadow: 0 10px 30px -5px rgba(0,0,0,0.03);
+            overflow: hidden; 
+            transition: transform 0.3s ease;
         }
-        .card-header-clean {
-            padding: 1.5rem; border-bottom: 1px solid #f1f5f9; background: white;
-            display: flex; align-items: center; gap: 10px;
-        }
-        .card-title { font-weight: 700; font-size: 1rem; color: var(--text-main); margin: 0; }
 
-        /* --- Table Styling --- */
+        .table-wrapper {
+            max-height: 550px;
+            overflow-y: auto; overflow-x: hidden;
+        }
+        .table-wrapper::-webkit-scrollbar { width: 6px; }
+        .table-wrapper::-webkit-scrollbar-track { background: transparent; }
+        .table-wrapper::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+
+        .table-custom { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+
         .table-custom thead th {
-            background-color: #f8fafc; color: var(--text-muted);
-            font-weight: 700; font-size: 0.75rem; text-transform: uppercase;
-            letter-spacing: 0.05em; padding: 1rem; border-bottom: 1px solid #e2e8f0; border-top: none;
+            position: sticky; top: 0; z-index: 20;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+            color: var(--text-muted); font-size: 0.75rem; font-weight: 800; 
+            text-transform: uppercase; letter-spacing: 0.1em;
+            padding: 1.5rem 1.2rem; border-bottom: 1px solid #e2e8f0;
         }
-        .table-custom tbody td {
-            padding: 1.2rem 1rem; vertical-align: middle;
-            border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; color: var(--text-main);
+
+        .table-custom tbody td { 
+            padding: 1.2rem; border-bottom: 1px solid rgba(0,0,0,0.03); 
+            vertical-align: middle; font-size: 0.95rem; font-weight: 500;
+            background: transparent; word-wrap: break-word;
         }
-        
-        /* --- Buttons --- */
-        .btn-clean {
+        .table-custom tr:last-child td { border-bottom: none; }
+        .table-custom tbody tr:hover { background-color: rgba(255,255,255,0.9); }
+
+        /* --- BUTTONS & BADGES --- */
+        a { text-decoration: none !important; }
+
+        .btn-glass-back {
             background: white; border: 1px solid #e2e8f0; color: var(--text-main);
-            font-weight: 600; padding: 0.6rem 1.2rem; border-radius: 12px;
+            font-weight: 700; padding: 0.7rem 1.4rem; border-radius: 50px;
             display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;
-            text-decoration: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
         }
-        .btn-clean:hover { background: #f8fafc; border-color: #cbd5e1; }
+        .btn-glass-back:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); color: var(--primary); }
 
-        .btn-primary-soft {
-            background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;
-            font-weight: 600; padding: 0.5rem 1.2rem; border-radius: 10px;
-            display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;
-            text-decoration: none; font-size: 0.85rem;
+        .btn-action-soft {
+            background: #e0f2fe; color: #0369a1; border: none;
+            padding: 0.6rem 1.2rem; border-radius: 10px; font-weight: 700; font-size: 0.85rem;
+            display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;
         }
-        .btn-primary-soft:hover { background: #d1fae5; color: #047857; transform: translateY(-2px); }
+        .btn-action-soft:hover { background: #0369a1; color: white; transform: translateY(-2px); }
 
-        /* --- Badges --- */
-        .badge-pill {
-            padding: 0.3em 0.7em; border-radius: 6px;
-            font-weight: 600; font-size: 0.75rem;
-        }
-        .badge-gray { background: #f1f5f9; color: #475569; }
-        .badge-blue { background: #e0f2fe; color: #0369a1; }
-        .badge-purple { background: #f3e8ff; color: #7e22ce; }
+        .badge-pill { padding: 6px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; }
+        .badge-gray { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+        .badge-blue { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+        .badge-purple { background: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; }
 
-        /* --- Empty State --- */
-        .empty-state { padding: 4rem 1rem; text-align: center; color: var(--text-muted); }
+        /* --- EMPTY STATE --- */
+        .empty-state { padding: 5rem 2rem; text-align: center; }
+        .empty-icon { font-size: 3.5rem; color: #cbd5e1; margin-bottom: 1rem; }
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-clean">
+    <nav class="navbar navbar-expand-lg navbar-clean mb-5">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-3" href="#">
+            <a class="navbar-brand d-flex align-items-center gap-3" href="../dashboard/welcome_dosen.php">
                 <div class="logo-box">
-                    <iconify-icon icon="solar:infinity-bold" style="font-size: 1.5rem;"></iconify-icon>
+                    <iconify-icon icon="solar:infinity-bold" width="24"></iconify-icon>
                 </div>
-                <div style="line-height: 1.2;">
-                    <h5 class="fw-bold mb-0 text-dark" style="font-size: 1.1rem;">SIPRESMA</h5>
-                    <small class="text-muted fw-bold" style="font-size: 0.65rem; letter-spacing: 1px; display: block;">
-                        LECTURER PORTAL
-                    </small>
+                <div>
+                    <h5 class="fw-bold mb-0 brand-text">SIPRESMA</h5>
+                    <p class="mb-0 brand-sub">LECTURER PORTAL</p>
                 </div>
             </a>
-
-            <div class="d-flex align-items-center gap-3">
-                <div class="d-none d-md-block text-end" style="line-height: 1.2;">
-                    <span class="fw-bold d-block text-dark" style="font-size: 0.9rem;">
-                        <?php echo $nama_depan; ?>
-                    </span>
-                    <small class="text-muted" style="font-size: 0.75rem;">
-                        Lecturer
-                    </small>
+            
+            <div class="d-flex align-items-center gap-4">
+                <div class="d-none d-md-block text-end">
+                    <p class="mb-0 fw-bold text-dark" style="font-size: 0.9rem;"><?php echo $nama_depan; ?></p>
+                    <p class="mb-0 text-success d-flex align-items-center justify-content-end gap-1" style="font-size: 0.75rem; font-weight: 600;">
+                        <iconify-icon icon="solar:record-circle-bold" style="font-size: 8px;"></iconify-icon> Lecturer
+                    </p>
                 </div>
-                <div class="bg-light rounded-circle border p-1 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                    <iconify-icon icon="solar:user-circle-bold" class="text-secondary" style="font-size: 1.8rem;"></iconify-icon>
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center text-decoration-none" data-bs-toggle="dropdown">
+                        <div class="bg-white rounded-circle border p-1 shadow-sm transition-hover">
+                             <iconify-icon icon="solar:user-circle-bold-duotone" width="40" class="text-primary"></iconify-icon>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 p-2 mt-2">
+                        <li><h6 class="dropdown-header text-uppercase small fw-bold">Account</h6></li>
+                        <li><a class="dropdown-item rounded-3 mb-1" href="#"><iconify-icon icon="solar:settings-bold-duotone" class="me-2 text-primary"></iconify-icon>Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item rounded-3 text-danger fw-bold" href="../logout.php"><iconify-icon icon="solar:logout-2-bold-duotone" class="me-2"></iconify-icon>Logout</a></li>
+                    </ul>
                 </div>
             </div>
         </div>
     </nav>
 
-    <div class="container">
+    <div class="container mb-5 pb-5">
         
-        <div class="page-header">
+        <div class="page-header animate-entry" style="animation-delay: 0.1s;">
             <div>
                 <h2 class="page-title">Input Nilai Mahasiswa</h2>
-                <p class="page-subtitle">Kelola nilai ujian, tugas, dan evaluasi kelas Anda.</p>
+                <p class="page-subtitle">Pilih kelas perkuliahan untuk mengelola nilai.</p>
             </div>
-            <div class="d-flex gap-2">
-                <a href="../dashboard/welcome_dosen.php" class="btn-clean">
+            <div>
+                <a href="../dashboard/welcome_dosen.php" class="btn-glass-back">
                     <iconify-icon icon="solar:arrow-left-linear"></iconify-icon> Dashboard
                 </a>
             </div>
         </div>
 
-        <div class="info-box">
-            <div>
-                <div class="d-flex align-items-center gap-3 mb-2">
-                    <div class="logo-box" style="width: 48px; height: 48px; background: #f1f5f9; color: var(--text-muted);">
-                        <iconify-icon icon="solar:user-id-bold-duotone" style="font-size: 1.5rem;"></iconify-icon>
-                    </div>
-                    <div>
-                        <label>Dosen Pengampu</label>
-                        <div><?php echo $nama_dosen; ?></div>
-                    </div>
+        <div class="info-glass animate-entry" style="animation-delay: 0.2s;">
+            <div class="d-flex align-items-center gap-3">
+                <div class="logo-box" style="background: #f1f5f9; color: var(--text-muted);">
+                    <iconify-icon icon="solar:user-id-bold-duotone" style="font-size: 1.5rem;"></iconify-icon>
+                </div>
+                <div>
+                    <div class="info-label">Dosen Pengampu</div>
+                    <div class="info-value"><?php echo $dosen['nama_lengkap']; ?></div>
                 </div>
             </div>
             <div class="text-end">
-                <label>Semester Aktif</label>
+                <div class="info-label">Semester Aktif</div>
                 <?php if($smt) { ?>
-                    <span class="badge-pill badge-purple" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                    <span class="badge-pill badge-purple">
+                        <iconify-icon icon="solar:calendar-bold" class="me-1"></iconify-icon>
                         <?php echo $smt['nama_semester']; ?>
                     </span>
                 <?php } else { ?>
-                    <span class="text-danger fw-bold">Tidak Aktif</span>
+                    <span class="badge-pill bg-danger-subtle text-danger">Tidak Aktif</span>
                 <?php } ?>
             </div>
         </div>
 
-        <div class="card-modern">
-            <div class="card-header-clean">
-                <div class="d-flex align-items-center gap-2">
-                    <iconify-icon icon="solar:users-group-two-rounded-bold-duotone" class="text-primary fs-5"></iconify-icon>
-                    <h6 class="card-title">Daftar Kelas Perkuliahan Anda</h6>
-                </div>
-            </div>
-            
-            <div class="table-responsive">
+        <div class="card-modern animate-entry" style="animation-delay: 0.3s;">
+            <div class="table-wrapper">
                 <table class="table table-custom mb-0">
                     <thead>
                         <tr>
                             <th width="5%" class="text-center">No</th>
                             <th width="35%">Mata Kuliah</th>
-                            <th width="10%" class="text-center">Kelas</th>
+                            <th width="15%" class="text-center">Kelas</th>
                             <th width="20%">Jadwal</th>
-                            <th width="15%" class="text-center">Jumlah Mhs</th>
+                            <th width="10%" class="text-center">Mahasiswa</th>
                             <th width="15%" class="text-end">Aksi</th>
                         </tr>
                     </thead>
@@ -241,37 +275,44 @@ $smt = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT * FROM semester WHERE s
 
                         $no = 1;
                         if(mysqli_num_rows($query) == 0) {
-                            echo "<tr><td colspan='6' class='empty-state'>
-                                <iconify-icon icon='solar:folder-with-files-linear' class='fs-1 mb-2'></iconify-icon><br>
-                                Anda belum memiliki kelas perkuliahan
+                            echo "<tr><td colspan='6'>
+                                <div class='empty-state'>
+                                    <iconify-icon icon='solar:notebook-minimalistic-linear' class='empty-icon'></iconify-icon>
+                                    <h6 class='fw-bold text-dark'>Belum Ada Kelas</h6>
+                                    <p class='text-muted small'>Anda belum memiliki jadwal mengajar semester ini.</p>
+                                </div>
                             </td></tr>";
                         }
 
                         while($row = mysqli_fetch_assoc($query)) {
                         ?>
                             <tr>
-                                <td class="text-center fw-semibold text-muted"><?php echo $no++; ?></td>
+                                <td class="text-center fw-bold text-muted"><?php echo $no++; ?></td>
+                                
                                 <td>
                                     <span class="fw-bold text-dark d-block"><?php echo $row['nama_mk']; ?></span>
                                     <small class="text-muted"><?php echo $row['sks']; ?> SKS</small>
                                 </td>
+                                
                                 <td class="text-center">
                                     <span class="badge-pill badge-gray"><?php echo $row['nama_kelas']; ?></span>
                                 </td>
+                                
                                 <td>
-                                    <div class="d-flex flex-column">
-                                        <span class="fw-bold text-dark" style="font-size: 0.85rem;"><?php echo $row['hari']; ?></span>
-                                        <span class="text-muted" style="font-size: 0.8rem;">
-                                            <?php echo date('H:i', strtotime($row['jam_mulai'])); ?> - <?php echo date('H:i', strtotime($row['jam_selesai'])); ?>
-                                        </span>
-                                    </div>
+                                    <span class="fw-bold text-dark small d-block"><?php echo $row['hari']; ?></span>
+                                    <span class="text-muted small">
+                                        <iconify-icon icon="solar:clock-circle-linear" style="position: relative; top: 1px;"></iconify-icon>
+                                        <?php echo date('H:i', strtotime($row['jam_mulai'])) . ' - ' . date('H:i', strtotime($row['jam_selesai'])); ?>
+                                    </span>
                                 </td>
+                                
                                 <td class="text-center">
-                                    <span class="badge-pill badge-blue"><?php echo $row['jumlah_mhs']; ?> Orang</span>
+                                    <span class="badge-pill badge-blue"><?php echo $row['jumlah_mhs']; ?> Org</span>
                                 </td>
+                                
                                 <td class="text-end">
-                                    <a href="create.php?id_kelas=<?php echo $row['id_kelas']; ?>" class="btn-primary-soft">
-                                        <iconify-icon icon="solar:pen-new-square-bold"></iconify-icon> Input Nilai
+                                    <a href="create.php?id_kelas=<?php echo $row['id_kelas']; ?>" class="btn-action-soft">
+                                        <iconify-icon icon="solar:pen-new-square-bold"></iconify-icon> Kelola Nilai
                                     </a>
                                 </td>
                             </tr>
@@ -280,12 +321,6 @@ $smt = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT * FROM semester WHERE s
                 </table>
             </div>
         </div>
-
-        <?php if(mysqli_num_rows($query) > 0) { ?>
-            <div class="mt-4 text-center text-muted small">
-                Menampilkan <strong><?php echo mysqli_num_rows($query); ?></strong> kelas perkuliahan
-            </div>
-        <?php } ?>
 
     </div>
 
